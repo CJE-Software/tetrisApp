@@ -46,32 +46,119 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const theTetrominoes = [lTetromino, zTetromino, tTetromino, oTetromino, iTetromino]
 
+    //tetromino position and rotation
     let currentPosition = 4;
     let currentRotation = 0;
-
-    let random = Math.floor(Math.random() * theTetrominoes.length)
-    console.log(random)
-    let current = theTetrominoes[random][0];
-
+    //gets random number between 0-4 (inclusive)
+    let random = Math.floor(Math.random()*theTetrominoes.length)
+    let current = theTetrominoes[random][currentRotation];
+    //creates/draws the tetromino
     function draw() {
         current.forEach(index => {
             squares[currentPosition + index].classList.add('tetromino')
         })
     }
-
+    //erases the tetromino
     function undraw() {
         current.forEach(index => {
             squares[currentPosition + index].classList.remove('tetromino')
         })
     }
 
+    //making the tetrominoes move according to time
+    timerId = setInterval(moveDown, 1000)
+
+    //assign functions to keycodes
+    function control(e) {
+        if (e.keyCode === 37) {
+            moveLeft();
+        } else if (e.keyCode === 38) {
+            //rotate() UPARROW
+            rotate();
+        } else if (e.keyCode === 39) {
+            //moveRight() RIGHTARROW
+            moveRight();
+        } else if (e.keyCode === 40) {
+            moveDown();
+        }
+    }
+    document.addEventListener('keyup', control)
+
+    //implementing the time function
+    function moveDown() {
+        undraw()
+        currentPosition += width
+        draw()
+        freeze()
+    }
+
+    //implementing a freeze function so tetrominoes do not fall through floor
+    function freeze() {
+        if (current.some(index => squares[currentPosition + index + width].classList.contains('taken'))) {
+            current.forEach(index => squares[currentPosition + index].classList.add('taken'))
+            random = Math.floor(Math.random() * theTetrominoes.length)
+            current = theTetrominoes[random][currentRotation]
+            currentPosition = 4
+            draw()
+        }
+    }
+
+    //move the tetromino left unless it is at the edge or the passage is blocked by another object
+    function moveLeft() {
+        undraw()
+        const isAtLeftEdge = current.some(index => (currentPosition + index) % width === 0)
+
+        if(!isAtLeftEdge) currentPosition -= 1;
+
+        if(current.some(index => squares[currentPosition + index].classList.contains('taken'))) {
+            currentPosition += 1;
+        }
+
+        draw();
+
+    }
+
+    //moveRight()
+    function moveRight() {
+        undraw()
+        const isAtRightEdge = current.some(index => (currentPosition + index) % width === width -1)
+
+        if (!isAtRightEdge) currentPosition += 1;
+
+        if (current.some(index => squares[currentPosition + index].classList.contains('taken'))) {
+            currentPosition -= 1;
+        }
+
+        draw()
+
+    }
+
+    //rotate the tetromino
+    function rotate() {
+        undraw()
+        currentRotation++
+        if (currentRotation === current.length) { //if currentRotation reaches 4, make it go back to index 0 of array
+            currentRotation = 0;
+        }
+        current = theTetrominoes[random][currentRotation]
+        draw();
+    }
+
+    //show next tetromino in mini-grid
+    const displaySquares = document.querySelectorAll('.mini-grid div');
+    const displayWidth = 4;
+    let displayIndex = 0;
+
+    const upNextTetrominoes = [
+        [1, displayWidth+1, displayWidth*2+1, 2], //lTetromino
+        [0, displayWidth, displayWidth+1, displayWidth*2+1], //zTetromino
+        [1, displayWidth, displayWidth+1, displayWidth+2], //tTetromino
+        [0, 1, displayWidth, displayWidth+1], //oTetromino
+        [1, displayWidth+1, displayWidth*2+1, displayWidth*3+1] //iTetromino
+    ];
+
+    //display the tetromino in the mini-grid
 
 
+//end game state below
 })
-
-/*
-let names = ['cj', 'ivee', 'mom', 'mark'];
-names.forEach(name => {
-    console.log(name + ' is awesome')
-})
-*/
